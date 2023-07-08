@@ -42,12 +42,6 @@ async function connectToDb(collectionName) {
     return collection;
 }
 
-//Conexion con la coleccion requerida
-async function generateID(collection) {   
-    const documentMaxId = await collection.find().sort({ id: -1}).limit(1).toArray();
-    const maxId = documentMaxId[0]?.id ?? 0;
-    
-    return maxId + 1;
-}
 
-module.exports = { connectToDb, disconnect, generateID }
+
+module.exports = { connectToDb, disconnect }

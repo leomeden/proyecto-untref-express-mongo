@@ -2,10 +2,7 @@
 const express = require("express");
 const server = express();
 
-//const { connectToDb, disconnect, generateID} = require('./database/db.conexions');
-
-const conexion = require('./database/db.conexions');
-const manager = require('./database/data.manager')
+const controller = require('./controllers/coches.controllers');
 
 // Middleware: Establece el manejo de datos en formato JSON
 /*You NEED express.json() and express.urlencoded() for POST and PUT requests, 
@@ -16,103 +13,19 @@ server.use(express.urlencoded({ extended: true }));
 
 // Obtener coches con params en forma dinamica: 
 // Ruta GET http://127.0.0.1:3000/coches
-server.get('/coches/', async (req, res) => {
-    const { marca, modelo, precio_mayor_que } = req.query;
-    const filtros = {};
-
-    if (marca) filtros.marca = marca;
-    if(modelo) filtros.modelo = modelo;
-    if(precio_mayor_que) filtros.precio = { $gt: +precio_mayor_que}
-
-    let coches = [];
-
-    coches = await manager.gets(filtros);
-    
-    if(coches.length == 0) return res.status(400).send('Error. No hay coches con la descripción dada');
-    res.status(200).send(JSON.stringify(coches, null, '\t'));
-
-});
+server.get('/coches/', async (req, res) => controller.handleGets(req, res));
 
 // Obtener un coche: Ruta GET http://127.0.0.1:3000/coches
-server.get('/coches/:id', async (req, res) => {
-    const { id } = req.params;
-
-    const collection = await conexion.connectToDb('coches');
-    const coche = await collection.findOne({ id: +id });
-
-    await conexion.disconnect();
-
-    if(!coche) return res.status(400).send('Error. No hay coches con ese id');
-    res.status(200).send(JSON.stringify(coche, null, '\t'));
-
-});
+server.get('/coches/:id', async (req, res) => controller.handleGetById(req, res));
 
 // Obtener un coche: Ruta GET http://127.0.0.1:3000/coches
-server.post('/coches', async (req, res) => {
-    const { marca, modelo, anio, precio, descuento, velocidad_crucero, es_0km } = req.body;
-
-    if(!marca || !modelo || !anio || !precio) {
-        return res.status(400).send('Error. Los datos no estan completos!!')
-    }
-
-    const collection = await conexion.connectToDb('coches');
-    const coche = { id: await conexion.generateID(collection), marca, modelo, anio, precio};
-    if(descuento) coche.descuento = descuento;
-    if(velocidad_crucero) coche.velocidad_crucero = velocidad_crucero;
-    if(es_0km) coche.es_Okm = es_0km;
-
-    await collection.insertOne(coche);
-
-    await conexion.disconnect();
-
-    res.status(200).send(JSON.stringify(coche, null, '\t'));
-
-});
+server.post('/coches', async (req, res) => controller.handlePost(req, res));
 
 // Modificar un coche: Ruta GET http://127.0.0.1:3000/coches
-server.put('/coches/:id', async (req, res) => {
-    const { id } = req.params
-    const { marca, modelo, anio, precio, descuento, velocidad_crucero, es_0km } = req.body;
-    const coche = { marca, modelo, anio, precio};
-
-    if(!id || !marca || !modelo || !anio || !precio) {
-        return res.status(400).send('Error. Los datos no estan completos!!')
-    }
-
-    if(descuento) coche.descuento = descuento;
-    if(velocidad_crucero) coche.velocidad_crucero = velocidad_crucero;
-    if(es_0km) coche.es_Okm = es_0km;
-
-    try {
-        const collection = await conexion.connectToDb('coches');
-        await collection.updateOne({ id: +id }, { $set: coche });
-        res.status(200).send(JSON.stringify(coche, null, '\t'));
-
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).send('Error en el servidor');
-    } finally {
-        await conexion.disconnect();
-    }
-});
+server.put('/coches/:id', async (req, res) => controller.handlePut(req, res));
 
 // Borrar un coche: Ruta GET http://127.0.0.1:3000/coches
-server.delete('/coches/:id', async (req, res) => {
-    const { id } = req.params
-    
-    try {
-        const collection = await conexion.connectToDb('coches');
-        await collection.deleteOne({ id: +id });
-        res.status(200).send('Eliminado');
-
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).send('Error en el servidor');
-    } finally {
-        await conexion.disconnect();
-    }
-});
-
+server.delete('/coches/:id', async (req, res) => controller.handleDelete(req, res));
 
 // Control de rutas inexistentes
 server.use('*', (req, res) => {
