@@ -8,44 +8,48 @@ async function generateID(collection) {
     return maxId + 1;
 }
 
-async function gets(filtros) {
-    let coches = [];
-    const collection = await conexion.connectToDb('coches');
-    coches = (await collection.find(filtros).sort({ id: 1 }).toArray());
+//Traer documentos con filtro por "querys"
+async function gets(filtros, coll) {
+    let docs = [];
+    const collection = await conexion.connectToDb(coll);
+    docs = (await collection.find(filtros).sort({ id: 1 }).toArray());
     await conexion.disconnect();
-    return coches;
+    return docs;
 }
 
-async function getById(id) {
-    const collection = await conexion.connectToDb('coches');
-    const coche = await collection.findOne({ id: +id });
+//Traer documento por ID
+async function getById(id, coll) {
+    const collection = await conexion.connectToDb(coll);
+    const doc = await collection.findOne({ id: +id });
     await conexion.disconnect();
-    return coche;
+    return doc;
 }
 
-async function add(data) {
-    const collection = await conexion.connectToDb('coches');
-    let coche = { id: await generateID(collection), ...data};
+// Agregar usuario a la coleccion
+async function add(data, coll) {
+    const collection = await conexion.connectToDb(coll);
+    let doc = { id: await generateID(collection), ...data};
     
-    await collection.insertOne(coche);
+    await collection.insertOne(doc);
 
     await conexion.disconnect();
 
-    return coche;
+    return doc;
 
 }
 
-async function put(id, data) {
-    let coche = data;
-    console.log('coche: ', coche);
-    const collection = await conexion.connectToDb('coches');
+// Modificar Usuario
+async function put(id, data, coll) {
+    let doc = data;
+    const collection = await conexion.connectToDb(coll);
     await collection.updateOne({ id: +id }, { $set: data });
     await conexion.disconnect();
-    return coche
+    return doc
 }
 
-async function destroy(id) {
-    const collection = await conexion.connectToDb('coches');
+// Eliminar Usuario
+async function destroy(id, coll) {
+    const collection = await conexion.connectToDb(coll);
     await collection.deleteOne({ id: +id });
     await conexion.disconnect();
     return
