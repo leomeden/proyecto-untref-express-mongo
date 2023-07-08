@@ -2,7 +2,10 @@
 const express = require("express");
 const server = express();
 
-const { connectToDb, disconnect, generateID} = require('../mongodb.js');
+//const { connectToDb, disconnect, generateID} = require('./database/db.conexions');
+
+const conexion = require('./database/db.conexions');
+const manager = require('./database/data.manager')
 
 // Middleware: Establece el manejo de datos en formato JSON
 /*You NEED express.json() and express.urlencoded() for POST and PUT requests, 
@@ -23,10 +26,8 @@ server.get('/coches/', async (req, res) => {
 
     let coches = [];
 
-    const collection = await connectToDb('coches');
-    coches = (await collection.find(filtros).sort({ id: 1 }).toArray());
-    await disconnect();
-
+    coches = await manager.gets(filtros);
+    
     if(coches.length == 0) return res.status(400).send('Error. No hay coches con la descripción dada');
     res.status(200).send(JSON.stringify(coches, null, '\t'));
 
@@ -36,10 +37,10 @@ server.get('/coches/', async (req, res) => {
 server.get('/coches/:id', async (req, res) => {
     const { id } = req.params;
 
-    const collection = await connectToDb('coches');
+    const collection = await conexion.connectToDb('coches');
     const coche = await collection.findOne({ id: +id });
 
-    await disconnect();
+    await conexion.disconnect();
 
     if(!coche) return res.status(400).send('Error. No hay coches con ese id');
     res.status(200).send(JSON.stringify(coche, null, '\t'));
@@ -54,15 +55,15 @@ server.post('/coches', async (req, res) => {
         return res.status(400).send('Error. Los datos no estan completos!!')
     }
 
-    const collection = await connectToDb('coches');
-    const coche = { id: await generateID(collection), marca, modelo, anio, precio};
+    const collection = await conexion.connectToDb('coches');
+    const coche = { id: await conexion.generateID(collection), marca, modelo, anio, precio};
     if(descuento) coche.descuento = descuento;
     if(velocidad_crucero) coche.velocidad_crucero = velocidad_crucero;
     if(es_0km) coche.es_Okm = es_0km;
 
     await collection.insertOne(coche);
 
-    await disconnect();
+    await conexion.disconnect();
 
     res.status(200).send(JSON.stringify(coche, null, '\t'));
 
@@ -83,7 +84,7 @@ server.put('/coches/:id', async (req, res) => {
     if(es_0km) coche.es_Okm = es_0km;
 
     try {
-        const collection = await connectToDb('coches');
+        const collection = await conexion.connectToDb('coches');
         await collection.updateOne({ id: +id }, { $set: coche });
         res.status(200).send(JSON.stringify(coche, null, '\t'));
 
@@ -91,7 +92,7 @@ server.put('/coches/:id', async (req, res) => {
         console.log(error.message);
         res.status(500).send('Error en el servidor');
     } finally {
-        await disconnect();
+        await conexion.disconnect();
     }
 });
 
@@ -100,7 +101,7 @@ server.delete('/coches/:id', async (req, res) => {
     const { id } = req.params
     
     try {
-        const collection = await connectToDb('coches');
+        const collection = await conexion.connectToDb('coches');
         await collection.deleteOne({ id: +id });
         res.status(200).send('Eliminado');
 
@@ -108,7 +109,7 @@ server.delete('/coches/:id', async (req, res) => {
         console.log(error.message);
         res.status(500).send('Error en el servidor');
     } finally {
-        await disconnect();
+        await conexion.disconnect();
     }
 });
 

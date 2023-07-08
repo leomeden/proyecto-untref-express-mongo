@@ -9,10 +9,10 @@
     },
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/leomeden/proyecto-untref-express-mongo.git"
     },
     "keywords": [],
-    "author": "Lic. Sergio Regalado Alessi",
+    "author": "Meden Leonardo",
     "license": "MIT",
     "dependencies": {
         "dotenv": "^16.3.1",
