@@ -12,19 +12,19 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
 // Obtener usuarios con params en forma dinamica: 
-// Ruta GET http://127.0.0.1:3000/coches
+// Ruta GET http://127.0.0.1:PORT/users
 server.get('/users/', async (req, res) => controller.handleGets(req, res));
 
-// Obtener un usuario por ID: Ruta GET http://127.0.0.1:3000/coches
+// Obtener un usuario por ID: Ruta GET http://127.0.0.1:PORT/users/:id
 server.get('/users/:id', async (req, res) => controller.handleGetById(req, res));
 
-// Obtener un coche: Ruta GET http://127.0.0.1:3000/coches
+// Crear un usuario: Ruta POST http://127.0.0.1:PORT/users/
 server.post('/users', async (req, res) => controller.handlePost(req, res));
 
-// Modificar un usuario: Ruta GET http://127.0.0.1:3000/coches
+// Modificar un usuario: Ruta PUT http://127.0.0.1:PORT/users/:id
 server.put('/users/:id', async (req, res) => controller.handlePut(req, res));
 
-// Borrar un usuario: Ruta GET http://127.0.0.1:3000/coches
+// Borrar un usuario: Ruta DELETE http://127.0.0.1:PORT/users/:id
 server.delete('/users/:id', async (req, res) => controller.handleDelete(req, res));
 
 // Control de rutas inexistentes

@@ -46,6 +46,7 @@ async function handleGetById(req, res) {
 }
 
 // Función para manejar la ruta post de agregar usuarios
+// parameros requeridos ( nombre, apellido, email, dni)
 async function handlePost(req, res) {
     
     const { nombre, apellido, dni, email, edad, altura, peso, sueldo } = req.body;
